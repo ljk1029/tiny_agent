@@ -1,21 +1,25 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_login import login_required, current_user
 import subprocess
 import json
 import re
+import logging
+import os
 
 commands_bp = Blueprint('commands', __name__)
 
-# 安全命令白名单
-SAFE_COMMANDS = {
-    'system_info': 'uname -a',
-    'disk_usage': 'df -h /',
-    'memory_usage': 'free -h',
-    'cpu_load': "top -bn1 | grep 'Cpu(s)'",
-    'list_services': 'systemctl list-units --type=service --state=running',
-    'check_network': 'netstat -tulpn',
-    'list_files': 'ls -la /app/uploads'
-}
+# 安全命令白名单（会在执行时动态获取上传目录路径）
+def get_safe_commands():
+    upload_folder = current_app.config.get('UPLOAD_FOLDER', 'uploads')
+    return {
+        'system_info': 'uname -a',
+        'disk_usage': 'df -h /',
+        'memory_usage': 'free -h',
+        'cpu_load': "top -bn1 | grep 'Cpu(s)'",
+        'list_services': 'systemctl list-units --type=service --state=running',
+        'check_network': 'netstat -tulpn',
+        'list_files': f'ls -lah "{upload_folder}"'
+    }
 
 @commands_bp.route('/execute', methods=['POST'])
 @login_required
@@ -27,6 +31,7 @@ def execute_command():
     data = request.json
     command_key = data.get('command')
     
+    SAFE_COMMANDS = get_safe_commands()
     if not command_key or command_key not in SAFE_COMMANDS:
         return jsonify({'error': '无效的命令'}), 400
     
@@ -63,6 +68,9 @@ def execute_command():
 @commands_bp.route('/available', methods=['GET'])
 @login_required
 def get_available_commands():
+    # 确保命令列表可用（检查上传目录是否存在）
+    SAFE_COMMANDS = get_safe_commands()
+    
     return jsonify({
         'commands': [
             {'key': 'system_info', 'name': '系统信息', 'description': '显示操作系统内核信息'},

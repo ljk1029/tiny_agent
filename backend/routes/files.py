@@ -1,6 +1,8 @@
-from flask import Blueprint, request, jsonify, send_from_directory
+from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from flask_login import current_user
 import os
+import logging
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from utils.ai_providers import process_with_ai
 
@@ -42,6 +44,34 @@ def upload_file():
     except Exception as e:
         logging.error(f"AI处理失败: {str(e)}")
         return jsonify({'error': f'处理失败: {str(e)}'}), 500
+
+@files_bp.route('/list', methods=['GET'])
+def list_files():
+    """列出所有已上传的文件"""
+    try:
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+        if not os.path.exists(upload_folder):
+            return jsonify({'files': []})
+        
+        files = []
+        for filename in os.listdir(upload_folder):
+            file_path = os.path.join(upload_folder, filename)
+            if os.path.isfile(file_path):
+                # 获取文件信息
+                stat = os.stat(file_path)
+                files.append({
+                    'name': filename,
+                    'size': stat.st_size,
+                    'modified': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+                })
+        
+        # 按修改时间排序，最新的在前
+        files.sort(key=lambda x: x['modified'], reverse=True)
+        
+        return jsonify({'files': files, 'total': len(files)})
+    except Exception as e:
+        logging.error(f"列出文件失败: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @files_bp.route('/download/<filename>')
 def download_file(filename):

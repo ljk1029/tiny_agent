@@ -1,8 +1,10 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 from flask_login import login_required, current_user
 import os
 import json
-from datetime import datetime
+import random
+from datetime import datetime, timedelta
+import logging
 
 logs_bp = Blueprint('logs', __name__)
 
@@ -13,7 +15,8 @@ def get_system_logs():
     if current_user.role != 'admin':
         return jsonify({'error': '权限不足'}), 403
     
-    log_file = os.path.join(current_app.config['LOG_FOLDER'], 'system.log')
+    # 日志文件在 logs 目录下
+    log_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'logs', 'system.log')
     logs = []
     
     if os.path.exists(log_file):

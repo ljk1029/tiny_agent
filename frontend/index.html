@@ -29,10 +29,15 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i><span id="userName">游客</span>
+                            <span id="userName"><i class="bi bi-person me-1"></i>游客</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" id="logoutBtn">登出</a></li>
+                            <li><a class="dropdown-item" href="/auth/login" id="loginBtn" style="display: none;">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>登录
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" id="logoutBtn" style="display: none;">
+                                <i class="bi bi-box-arrow-right me-2"></i>登出
+                            </a></li>
                         </ul>
                     </li>
                 </ul>
@@ -73,27 +78,36 @@
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="fileUpload" class="form-label">上传文件</label>
-                        <input class="form-control" type="file" id="fileUpload">
-                        <div class="form-text">支持PDF, DOCX, TXT, CSV (最大10MB)</div>
+                    <form id="fileUploadForm">
+                        <div class="mb-3">
+                            <label for="fileInput" class="form-label">上传文件</label>
+                            <input class="form-control" type="file" id="fileInput" name="file" required>
+                            <div class="form-text">支持PDF, DOCX, TXT, CSV (最大16MB)</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" id="uploadBtn" class="btn btn-primary px-4">
+                                <i class="bi bi-upload me-2"></i>上传并处理
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="fileResult" class="mt-4">
+                        <!-- 结果将显示在这里 -->
                     </div>
                     
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button id="processBtn" class="btn btn-primary px-4">
-                            <i class="bi bi-gear me-2"></i>开始处理
-                        </button>
-                        <button id="downloadSample" class="btn btn-outline-secondary">
-                            <i class="bi bi-download me-2"></i>下载示例文件
-                        </button>
-                    </div>
+                    <hr class="my-4">
                     
-                    <div id="resultContainer" class="mt-4 d-none">
-                        <h6 class="mb-3">处理结果:</h6>
-                        <div class="card">
-                            <div class="card-body" id="resultContent">
-                                <!-- 结果将显示在这里 -->
-                            </div>
+                    <h6 class="mb-3">
+                        <i class="bi bi-folder2-open me-2"></i>已上传的文件
+                        <button class="btn btn-sm btn-outline-secondary ms-2" onclick="loadFileList()">
+                            <i class="bi bi-arrow-clockwise"></i> 刷新
+                        </button>
+                    </h6>
+                    <div id="fileListSection">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                            <p class="mt-2 mb-0 text-muted">加载中...</p>
                         </div>
                     </div>
                 </div>
@@ -171,9 +185,9 @@
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- 自定义JS -->
-    <script src="/static/js/auth.js"></script>
-    <script src="/static/js/file.js"></script>
-    <script src="/static/js/logs.js"></script>
-    <script src="/static/js/commands.js"></script>
+    <script src="/static/js/m/auth.js"></script>
+    <script src="/static/js/m/file.js"></script>
+    <script src="/static/js/m/commands.js"></script>
+    <script src="/static/js/m/logs.js"></script>
 </body>
 </html>
