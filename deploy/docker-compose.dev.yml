@@ -1,0 +1,31 @@
+# 开发环境 Docker Compose 配置
+version: '3.8'
+
+services:
+  tiny_agent_dev:
+    image: tiny_agent:latest
+    # 如果镜像不存在，取消下面注释以自动构建
+    # build:
+    #   context: ..
+    #   dockerfile: deploy/Dockerfile
+    container_name: tiny_agent_dev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      # 开发模式：挂载代码目录实现热重载
+      - ../backend:/app/backend
+      - ../frontend:/app/frontend
+      - ../data:/app/data
+      - ../logs:/app/logs
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=dev-secret-key
+    command: python app.py
+    networks:
+      - dev_network
+
+networks:
+  dev_network:
+    driver: bridge
