@@ -19,6 +19,8 @@ function updateUserUI(userData) {
     const userName = document.getElementById('userName');
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const menuDivider = document.getElementById('menuDivider');
     
     if (userData.authenticated) {
         if (userName) {
@@ -29,16 +31,20 @@ function updateUserUI(userData) {
                 userName.innerHTML = '<i class="bi bi-person-circle me-1"></i>' + userData.username;
             }
         }
-        // 显示登出按钮，隐藏登录按钮
+        // 显示登出和修改密码按钮，隐藏登录按钮
         if (loginBtn) loginBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'block';
+        if (changePasswordBtn) changePasswordBtn.style.display = 'block';
+        if (menuDivider) menuDivider.style.display = 'block';
     } else {
         if (userName) {
             userName.innerHTML = '<i class="bi bi-person me-1"></i>游客';
         }
-        // 显示登录按钮，隐藏登出按钮
+        // 显示登录按钮，隐藏登出和修改密码按钮
         if (loginBtn) loginBtn.style.display = 'block';
         if (logoutBtn) logoutBtn.style.display = 'none';
+        if (changePasswordBtn) changePasswordBtn.style.display = 'none';
+        if (menuDivider) menuDivider.style.display = 'none';
     }
 }
 
@@ -174,10 +180,104 @@ async function registerUser(username, password) {
             alert(data.error || '注册失败，请稍后重试');
         }
     } catch (error) {
-        console.error('注册错误:', error);
-        alert('网络错误，请稍后重试');
+        console.error('登出错误:', error);
+        alert('登出失败，请稍后重试');
     }
 }
+
+// 修改密码功能
+document.addEventListener('DOMContentLoaded', function() {
+    const submitPasswordChange = document.getElementById('submitPasswordChange');
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const passwordChangeMessage = document.getElementById('passwordChangeMessage');
+    
+    if (submitPasswordChange && changePasswordForm) {
+        submitPasswordChange.addEventListener('click', async function() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // 清除之前的消息
+            passwordChangeMessage.classList.add('d-none');
+            
+            // 验证输入
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                showPasswordChangeMessage('请填写所有字段', 'danger');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showPasswordChangeMessage('新密码长度至少为6个字符', 'danger');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showPasswordChangeMessage('两次输入的新密码不一致', 'danger');
+                return;
+            }
+            
+            if (oldPassword === newPassword) {
+                showPasswordChangeMessage('新密码不能与旧密码相同', 'danger');
+                return;
+            }
+            
+            // 禁用按钮
+            submitPasswordChange.disabled = true;
+            submitPasswordChange.textContent = '修改中...';
+            
+            try {
+                const response = await fetch('/auth/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        old_password: oldPassword,
+                        new_password: newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showPasswordChangeMessage('密码修改成功！', 'success');
+                    // 清空表单
+                    changePasswordForm.reset();
+                    // 2秒后关闭模态框
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                        if (modal) modal.hide();
+                        passwordChangeMessage.classList.add('d-none');
+                    }, 2000);
+                } else {
+                    showPasswordChangeMessage(data.error || '修改密码失败', 'danger');
+                }
+            } catch (error) {
+                console.error('修改密码错误:', error);
+                showPasswordChangeMessage('网络错误，请稍后重试', 'danger');
+            } finally {
+                submitPasswordChange.disabled = false;
+                submitPasswordChange.textContent = '确认修改';
+            }
+        });
+    }
+    
+    // 显示密码修改消息
+    function showPasswordChangeMessage(message, type) {
+        passwordChangeMessage.textContent = message;
+        passwordChangeMessage.className = `alert alert-${type}`;
+        passwordChangeMessage.classList.remove('d-none');
+    }
+    
+    // 模态框关闭时清空表单和消息
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    if (changePasswordModal) {
+        changePasswordModal.addEventListener('hidden.bs.modal', function() {
+            if (changePasswordForm) changePasswordForm.reset();
+            passwordChangeMessage.classList.add('d-none');
+        });
+    }
+});
 
 // 检查登录状态
 async function checkLoginStatus() {

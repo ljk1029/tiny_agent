@@ -35,6 +35,10 @@
                             <li><a class="dropdown-item" href="/auth/login" id="loginBtn" style="display: none;">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>登录
                             </a></li>
+                            <li><a class="dropdown-item" href="#" id="changePasswordBtn" style="display: none;" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <i class="bi bi-key me-2"></i>修改密码
+                            </a></li>
+                            <li><hr class="dropdown-divider" id="menuDivider" style="display: none;"></li>
                             <li><a class="dropdown-item" href="#" id="logoutBtn" style="display: none;">
                                 <i class="bi bi-box-arrow-right me-2"></i>登出
                             </a></li>
@@ -177,6 +181,42 @@
                             <span>用户名或密码错误</span>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码模态框 -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="bi bi-key me-2"></i>修改密码
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="oldPassword" class="form-label">当前密码</label>
+                            <input type="password" class="form-control" id="oldPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">新密码</label>
+                            <input type="password" class="form-control" id="newPassword" required minlength="6">
+                            <div class="form-text">密码长度至少6个字符</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">确认新密码</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                        <div id="passwordChangeMessage" class="alert d-none"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submitPasswordChange">确认修改</button>
                 </div>
             </div>
         </div>
